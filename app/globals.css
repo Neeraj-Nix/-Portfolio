@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-montserrat: "Montserrat", sans-serif;
+
+  /* Overrides for text color #0066ff */
+  --color-zinc-950: #0044bb;
+  /* Dark mode bg or text */
+  --color-zinc-900: #0066ff;
+  --color-zinc-800: #0066ff;
+  --color-zinc-700: #0066ff;
+  --color-zinc-600: #0066ff;
+  --color-zinc-500: #0066ff;
+
+  /* Overrides for background color #ffff */
+  --color-white: #ffffff;
+  --color-zinc-50: #ffffff;
+  --color-zinc-100: #ffffff;
+}
+
+@layer base {
+  body {
+    background-color: #ffffff;
+    color: #0066ff;
+    font-family: var(--font-montserrat);
+    scroll-behavior: smooth;
+  }
+
+  img {
+    box-shadow: 0 2px 8px rgba(0, 102, 255, 0.15);
+  }
+}

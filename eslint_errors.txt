@@ -1,0 +1,10 @@
+C:\Users\spicy\OneDrive\Desktop\My Portfolio\app\admin\layout.js
+  Line 6: Parsing error: Unexpected token, expected "," (6:0)
+C:\Users\spicy\OneDrive\Desktop\My Portfolio\app\api\admin\login\route.js
+  Line 6: Parsing error: Unexpected token, expected "," (6:0)
+C:\Users\spicy\OneDrive\Desktop\My Portfolio\app\api\projects\route.js
+  Line 4: Parsing error: Missing catch or finally clause. (4:55)
+C:\Users\spicy\OneDrive\Desktop\My Portfolio\app\api\upload\route.js
+  Line 4: Parsing error: Missing catch or finally clause. (4:78)
+C:\Users\spicy\OneDrive\Desktop\My Portfolio\components\Navbar.jsx
+  Line 8: Parsing error: Unexpected token (8:0)
