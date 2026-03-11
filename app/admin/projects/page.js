@@ -179,7 +179,7 @@ export default function AdminProjects() {
               )}{" "}
               <div className="absolute top-3 left-3 bg-[#ffffff] backdrop-blur text-[#0066ff] text-xs px-2 py-1 rounded-md font-medium flex items-center gap-1">
                 {" "}
-                {project.category === "Videos" ? <FaVideo /> : <FaImage />}{" "}
+                {project.category === "Videos" || project.category === "Motion Graphics" ? <FaVideo /> : <FaImage />}{" "}
                 {project.category}{" "}
               </div>{" "}
             </div>{" "}
@@ -260,6 +260,7 @@ export default function AdminProjects() {
                       {" "}
                       <option value="Graphics">Graphics</option>{" "}
                       <option value="Videos">Videos</option>{" "}
+                      <option value="Motion Graphics">Motion Graphics</option>{" "}
                     </select>{" "}
                   </div>{" "}
                 </div>{" "}
@@ -304,7 +305,7 @@ export default function AdminProjects() {
                     </div>
                   </div>
                 </div>
-                {formData.category === "Videos" && (
+                {["Videos", "Motion Graphics"].includes(formData.category) && (
                   <div>
                     {" "}
                     <label className="block text-sm font-medium text-[#0066ff] dark:text-[#0066ff] mb-2">

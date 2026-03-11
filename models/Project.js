@@ -16,7 +16,7 @@ const ProjectSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, 'Please provide a category.'],
-      enum: ['Graphics', 'Videos'],
+      enum: ['Graphics', 'Videos', 'Motion Graphics'],
       default: 'Graphics',
     },
     mediaUrl: {

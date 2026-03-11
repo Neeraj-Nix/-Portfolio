@@ -20,25 +20,37 @@ export default function ProjectCard({ project, onClick }) {
       {" "}
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         {" "}
-        <img
-          src={(() => {
-            const url = project.mediaUrl;
-            if (!url) return "";
-            if (url.includes("drive.google.com/file/d/")) {
-              const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
-              return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
-            }
-            if (url.includes("drive.google.com/open?id=")) {
-              const id = url.split("id=")[1]?.split("&")[0];
-              return `https://drive.google.com/uc?export=view&id=${id}`;
-            }
-            return url;
-          })()}
-          alt={project.title}
-          className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
-        />{" "}
+        {(project.videoUrl?.match(/\.(mp4|webm|ogg)$/i) || project.videoUrl?.startsWith("data:video")) && !project.mediaUrl ? (
+          <video
+            src={project.videoUrl}
+            muted
+            playsInline
+            loop={isHovered}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+            onMouseEnter={(e) => { e.target.play().catch(()=>{}) }}
+            onMouseLeave={(e) => { e.target.pause() }}
+          />
+        ) : (
+          <img
+            src={(() => {
+              const url = project.mediaUrl;
+              if (!url) return "";
+              if (url.includes("drive.google.com/file/d/")) {
+                const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
+              }
+              if (url.includes("drive.google.com/open?id=")) {
+                const id = url.split("id=")[1]?.split("&")[0];
+                return `https://drive.google.com/uc?export=view&id=${id}`;
+              }
+              return url;
+            })()}
+            alt={project.title}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+          />
+        )}{" "}
         {/* Overlay for Video Type Projects */}{" "}
-        {project.category === "Videos" && (
+        {(project.category === "Videos" || project.category === "Motion Graphics") && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {" "}
             <div className="bg-[#ffffff] dark:bg-[#ffffff] rounded-full p-4 shadow-lg text-blue-600 dark:text-blue-500 transform transition-transform group-hover:scale-110">

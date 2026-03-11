@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import ProjectCard from "@/components/ProjectCard";
 import VideoModal from "@/components/VideoModal";
-const CATEGORIES = ["All", "Graphics", "Videos"];
+const CATEGORIES = ["All", "Graphics", "Videos", "Motion Graphics"];
 export default function Portfolio() {
   const [projects, setProjects] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
@@ -25,10 +25,22 @@ export default function Portfolio() {
     };
     fetchProjects();
   }, []);
-  const filteredProjects =
-    activeCategory === "All"
-      ? projects
-      : projects.filter((p) => p.category === activeCategory);
+  let filteredProjects = [];
+  if (activeCategory === "All") {
+    const graphics = projects.filter(p => p.category === "Graphics");
+    const videos = projects.filter(p => p.category === "Videos");
+    const motion = projects.filter(p => p.category === "Motion Graphics");
+    
+    // Interleave the arrays: one Graphic, one Video, one Motion Graphics repeating
+    let maxLen = Math.max(graphics.length, videos.length, motion.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (graphics[i]) filteredProjects.push(graphics[i]);
+      if (videos[i]) filteredProjects.push(videos[i]);
+      if (motion[i]) filteredProjects.push(motion[i]);
+    }
+  } else {
+    filteredProjects = projects.filter((p) => p.category === activeCategory);
+  }
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-screen">
       {" "}

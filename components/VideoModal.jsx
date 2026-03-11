@@ -30,8 +30,8 @@ export default function VideoModal({ isOpen, onClose, project }) {
             {" "}
             <FiX size={24} />{" "}
           </button>{" "}
-          {project.category === "Videos" && project.videoUrl ? (
-            project.videoUrl.startsWith("data:video") ? (
+          {(project.category === "Videos" || project.category === "Motion Graphics") && project.videoUrl ? (
+            project.videoUrl.startsWith("data:video") || project.videoUrl.match(/\.(mp4|webm|ogg)$/i) ? (
               <video
                 src={project.videoUrl}
                 controls
