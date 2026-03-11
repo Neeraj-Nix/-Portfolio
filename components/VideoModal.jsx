@@ -11,7 +11,7 @@ export default function VideoModal({ isOpen, onClose, project }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-[#ffffff] backdrop-blur-sm p-4 md:p-8"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 md:p-8"
       >
         {" "}
         <motion.div
@@ -19,7 +19,7 @@ export default function VideoModal({ isOpen, onClose, project }) {
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-5xl aspect-video bg-[#ffffff] rounded-2xl overflow-hidden shadow-2xl"
+          className="relative w-full max-w-5xl aspect-video bg-transparent rounded-2xl overflow-hidden"
         >
           {" "}
           <button
@@ -31,28 +31,37 @@ export default function VideoModal({ isOpen, onClose, project }) {
             <FiX size={24} />{" "}
           </button>{" "}
           {project.category === "Videos" && project.videoUrl ? (
-            <iframe
-              src={(() => {
-                const url = project.videoUrl;
-                if (!url) return "";
-                if (url.includes("drive.google.com/file/d/")) {
-                  const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
-                  return idMatch ? `https://drive.google.com/file/d/${idMatch[1]}/preview` : url;
-                }
-                if (url.includes("youtube.com/watch")) {
-                  return url.replace("watch?v=", "embed/").split("&")[0] + "?autoplay=1";
-                }
-                if (url.includes("youtu.be/")) {
-                  const id = url.split("youtu.be/")[1]?.split("?")[0];
-                  return `https://www.youtube.com/embed/${id}?autoplay=1`;
-                }
-                return url;
-              })()}
-              title={project.title}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            project.videoUrl.startsWith("data:video") ? (
+              <video
+                src={project.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain bg-black"
+              />
+            ) : (
+              <iframe
+                src={(() => {
+                  const url = project.videoUrl;
+                  if (!url) return "";
+                  if (url.includes("drive.google.com/file/d/")) {
+                    const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                    return idMatch ? `https://drive.google.com/file/d/${idMatch[1]}/preview` : url;
+                  }
+                  if (url.includes("youtube.com/watch")) {
+                    return url.replace("watch?v=", "embed/").split("&")[0] + "?autoplay=1";
+                  }
+                  if (url.includes("youtu.be/")) {
+                    const id = url.split("youtu.be/")[1]?.split("?")[0];
+                    return `https://www.youtube.com/embed/${id}?autoplay=1`;
+                  }
+                  return url;
+                })()}
+                title={project.title}
+                className="w-full h-full border-0 bg-black"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )
           ) : (
             <img
               src={(() => {

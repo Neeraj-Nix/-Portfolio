@@ -17,26 +17,7 @@ export async function GET() {
         dbError.message,
       );
     }
-    /* Add static images from public/img */
-    try {
-      const imgDir = path.join(process.cwd(), "public", "img");
-      if (fs.existsSync(imgDir)) {
-        const files = fs.readdirSync(imgDir);
-        const staticProjects = files
-          .filter((file) => file.match(/\.(jpg|jpeg|png|gif|webp)$/i))
-          .map((file, index) => ({
-            _id: `static-img-${index}`,
-            title: path.basename(file, path.extname(file)),
-            description: "Graphic Design",
-            category: "Graphics",
-            mediaUrl: `/img/${file}`,
-            createdAt: new Date().toISOString(),
-          }));
-        projects = [...projects, ...staticProjects];
-      }
-    } catch (fsError) {
-      console.error("Error reading static images:", fsError);
-    }
+    // Removed static image serving to ensure clean database state
     return NextResponse.json({ success: true, data: projects });
   } catch (error) {
     return NextResponse.json(

@@ -24,7 +24,15 @@ export default function Contact() {
     setLoading(true);
     setStatus({ type: "", msg: "" });
     try {
-      await axios.post("/api/contact", formData);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to send message");
+      }
       setStatus({
         type: "success",
         msg: "Message sent successfully! I will get back to you soon.",

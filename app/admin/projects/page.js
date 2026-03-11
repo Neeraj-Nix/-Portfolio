@@ -36,12 +36,48 @@ export default function AdminProjects() {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
+
+    let generatedThumbnail = null;
+    let isVideo = file.type.startsWith("video/");
+
+    // Auto-extract thumbnail for videos
+    if (isVideo) {
+      try {
+        generatedThumbnail = await new Promise((resolve, reject) => {
+          const video = document.createElement("video");
+          video.src = URL.createObjectURL(file);
+          video.muted = true;
+          video.onloadedmetadata = () => {
+            video.currentTime = Math.min(1, video.duration / 2); // Frame at 1 sec
+          };
+          video.onseeked = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", 0.7));
+            URL.revokeObjectURL(video.src);
+          };
+          video.onerror = () => resolve(null); // Fallback if extraction fails
+        });
+      } catch (err) {
+        console.error("Thumbnail extraction failed");
+      }
+    }
+
     const data = new FormData();
     data.append("file", file);
     try {
       const res = await axios.post("/api/upload", data);
       if (res.data.success) {
-        setFormData((prev) => ({ ...prev, mediaUrl: res.data.url }));
+        setFormData((prev) => ({ 
+          ...prev, 
+          // Set the base64 Video URL if video, otherwise set the normal Image URL
+          videoUrl: isVideo ? res.data.url : prev.videoUrl,
+          // Set the auto-extracted Thumbnail if video, otherwise set the normal Image URL
+          mediaUrl: isVideo && generatedThumbnail ? generatedThumbnail : res.data.url,
+          category: isVideo ? "Videos" : "Graphics"
+        }));
       }
     } catch (err) {
       console.error("Upload failed", err);
@@ -101,11 +137,10 @@ export default function AdminProjects() {
         </h1>{" "}
         <button
           onClick={openNewModal}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-[#0066ff] px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-[#ffffff] hover:bg-gray-50 text-[#0066ff] px-5 py-2.5 rounded-xl font-bold border border-[#0066ff] transition-all shadow-md hover:shadow-lg"
         >
-          {" "}
-          <FaPlus /> Add New{" "}
-        </button>{" "}
+          <FaPlus /> Add New
+        </button>
       </div>{" "}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {" "}
@@ -297,11 +332,10 @@ export default function AdminProjects() {
                   <button
                     type="submit"
                     disabled={uploading}
-                    className="px-6 py-3 rounded-xl font-bold text-[#0066ff] bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    className="px-6 py-3 rounded-xl font-bold text-[#0066ff] bg-[#ffffff] border border-[#0066ff] hover:shadow-lg transition-all disabled:opacity-50"
                   >
-                    {" "}
-                    Save Project{" "}
-                  </button>{" "}
+                    Save Project
+                  </button>
                 </div>{" "}
               </form>{" "}
             </motion.div>{" "}
