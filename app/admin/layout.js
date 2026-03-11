@@ -10,22 +10,13 @@ export default function AdminLayout({ children }) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     setIsClient(true);
-    /* Simple client side protection - checking cookie existence */
-    /* A more robust app would use Next.js Middleware to verify JWT */
-    if (
-      !document.cookie.includes("admin_token=") &&
-      pathname !== "/admin/login"
-    ) {
-      router.push("/admin/login");
-    }
-  }, [pathname, router]);
+  }, []);
 
-  const handleLogout = () => {
-    document.cookie =
-      "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
+    router.refresh();
   };
 
   if (!isClient) return null;

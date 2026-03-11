@@ -45,7 +45,7 @@ export default function AdminProjects() {
       }
     } catch (err) {
       console.error("Upload failed", err);
-      alert("File upload failed.");
+      alert(err.response?.data?.error || "File upload failed.");
     } finally {
       setUploading(false);
     }
@@ -120,7 +120,19 @@ export default function AdminProjects() {
               {" "}
               {project.mediaUrl ? (
                 <img
-                  src={project.mediaUrl}
+                  src={(() => {
+                    const url = project.mediaUrl;
+                    if (!url) return "";
+                    if (url.includes("drive.google.com/file/d/")) {
+                      const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                      return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
+                    }
+                    if (url.includes("drive.google.com/open?id=")) {
+                      const id = url.split("id=")[1]?.split("&")[0];
+                      return `https://drive.google.com/uc?export=view&id=${id}`;
+                    }
+                    return url;
+                  })()}
                   alt={project.title}
                   className="w-full h-full object-cover"
                 />
@@ -231,31 +243,32 @@ export default function AdminProjects() {
                   />{" "}
                 </div>{" "}
                 <div>
-                  {" "}
                   <label className="block text-sm font-medium text-[#0066ff] dark:text-[#0066ff] mb-2">
-                    Thumbnail Media
-                  </label>{" "}
-                  <div className="flex gap-4 items-center">
-                    {" "}
+                    Thumbnail Image / Drive Link
+                  </label>
+                  <div className="flex flex-col gap-3">
                     <input
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={handleFileUpload}
-                      className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />{" "}
-                    {uploading && (
-                      <span className="text-sm text-blue-500 animate-pulse">
-                        Uploading...
-                      </span>
-                    )}{" "}
-                  </div>{" "}
-                  {formData.mediaUrl && (
-                    <div className="mt-3 text-xs flex items-center gap-2 text-green-600 bg-green-50 p-2 rounded-lg truncate">
-                      {" "}
-                      ✓ Uploaded: {formData.mediaUrl}{" "}
+                      name="mediaUrl"
+                      type="text"
+                      placeholder="Paste image/link directly (e.g. Google Drive image link)..."
+                      value={formData.mediaUrl}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-xl bg-[#ffffff] dark:bg-[#ffffff] border border-[#0066ff] dark:border-[#0066ff] focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex gap-4 items-center">
+                      <span className="text-sm text-gray-500">OR Upload from device:</span>
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={handleFileUpload}
+                        className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                      {uploading && (
+                        <span className="text-sm text-blue-500 animate-pulse">Uploading...</span>
+                      )}
                     </div>
-                  )}{" "}
-                </div>{" "}
+                  </div>
+                </div>
                 {formData.category === "Videos" && (
                   <div>
                     {" "}

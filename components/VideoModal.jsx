@@ -32,10 +32,22 @@ export default function VideoModal({ isOpen, onClose, project }) {
           </button>{" "}
           {project.category === "Videos" && project.videoUrl ? (
             <iframe
-              src={
-                project.videoUrl.replace("watch?v=", "embed/").split("&")[0] +
-                "?autoplay=1"
-              }
+              src={(() => {
+                const url = project.videoUrl;
+                if (!url) return "";
+                if (url.includes("drive.google.com/file/d/")) {
+                  const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                  return idMatch ? `https://drive.google.com/file/d/${idMatch[1]}/preview` : url;
+                }
+                if (url.includes("youtube.com/watch")) {
+                  return url.replace("watch?v=", "embed/").split("&")[0] + "?autoplay=1";
+                }
+                if (url.includes("youtu.be/")) {
+                  const id = url.split("youtu.be/")[1]?.split("?")[0];
+                  return `https://www.youtube.com/embed/${id}?autoplay=1`;
+                }
+                return url;
+              })()}
               title={project.title}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -43,11 +55,23 @@ export default function VideoModal({ isOpen, onClose, project }) {
             />
           ) : (
             <img
-              src={project.mediaUrl}
+              src={(() => {
+                const url = project.mediaUrl;
+                if (!url) return "";
+                if (url.includes("drive.google.com/file/d/")) {
+                  const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                  return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
+                }
+                if (url.includes("drive.google.com/open?id=")) {
+                  const id = url.split("id=")[1]?.split("&")[0];
+                  return `https://drive.google.com/uc?export=view&id=${id}`;
+                }
+                return url;
+              })()}
               alt={project.title}
               className="w-full h-full object-contain"
             />
-          )}{" "}
+          )}
         </motion.div>{" "}
       </motion.div>{" "}
     </AnimatePresence>

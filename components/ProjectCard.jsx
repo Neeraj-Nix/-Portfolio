@@ -20,12 +20,22 @@ export default function ProjectCard({ project, onClick }) {
       {" "}
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         {" "}
-        <Image
-          src={project.mediaUrl}
+        <img
+          src={(() => {
+            const url = project.mediaUrl;
+            if (!url) return "";
+            if (url.includes("drive.google.com/file/d/")) {
+              const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+              return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
+            }
+            if (url.includes("drive.google.com/open?id=")) {
+              const id = url.split("id=")[1]?.split("&")[0];
+              return `https://drive.google.com/uc?export=view&id=${id}`;
+            }
+            return url;
+          })()}
           alt={project.title}
-          fill
-          className={`object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
         />{" "}
         {/* Overlay for Video Type Projects */}{" "}
         {project.category === "Videos" && (

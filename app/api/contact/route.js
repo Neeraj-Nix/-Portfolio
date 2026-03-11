@@ -53,7 +53,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: messages });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: "Database offline. Please start your local MongoDB or use a cloud Atlas URI. Stack: " + error.message },
       { status: 400 },
     );
   }
