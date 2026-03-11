@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Project from "@/models/Project";
+import dbConnect from "../../../lib/mongodb";
+import Project from "../../../models/Project";
 import fs from "fs";
 import path from "path";
 

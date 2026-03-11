@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Contact from "@/models/Contact";
+import dbConnect from "../../../lib/mongodb";
+import Contact from "../../../models/Contact";
 import nodemailer from "nodemailer";
 
 export async function POST(req) {
   try {
     const { name, email, message } = await req.json();
 
+    // 1. Save to Database
+    try {
+      await dbConnect();
+      await Contact.create({ name, email, message });
+    } catch (dbError) {
+      console.error("Database Save Error:", dbError);
+      // We'll continue to try sending the email even if DB fails, 
+      // but the user should know if it's completely failing.
+    }
+
+    // 2. Send Email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -28,15 +39,16 @@ export async function POST(req) {
     };
 
     await transporter.sendMail(mailOptions);
-    return NextResponse.json({ success: true, message: "Email sent" }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Message sent and stored successfully" }, { status: 200 });
   } catch (error) {
-    console.error("Email Error:", error);
+    console.error("Contact API Error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to send email" },
+      { success: false, error: "Failed to process message" },
       { status: 500 },
     );
   }
 }
+
 export async function GET() {
   try {
     await dbConnect();
@@ -49,3 +61,4 @@ export async function GET() {
     );
   }
 }
+
