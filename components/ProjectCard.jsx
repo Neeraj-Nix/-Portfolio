@@ -12,7 +12,7 @@ export default function ProjectCard({ project, onClick }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.3 }}
-      className="relative group cursor-pointer rounded-2xl overflow-hidden bg-[#ffffff] dark:bg-[#ffffff] shadow-sm hover:shadow-xl transition-all duration-300"
+      className="relative group cursor-pointer rounded-2xl overflow-hidden bg-transparent shadow-sm hover:shadow-xl transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onClick(project)}
@@ -20,35 +20,49 @@ export default function ProjectCard({ project, onClick }) {
       {" "}
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         {" "}
-        {(project.videoUrl?.match(/\.(mp4|webm|ogg)$/i) || project.videoUrl?.startsWith("data:video")) && !project.mediaUrl ? (
-          <video
-            src={project.videoUrl}
-            muted
-            playsInline
-            loop={isHovered}
-            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
-            onMouseEnter={(e) => { e.target.play().catch(()=>{}) }}
-            onMouseLeave={(e) => { e.target.pause() }}
-          />
-        ) : (
-          <img
-            src={(() => {
-              const url = project.mediaUrl;
-              if (!url) return "";
-              if (url.includes("drive.google.com/file/d/")) {
-                const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
-                return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
-              }
-              if (url.includes("drive.google.com/open?id=")) {
-                const id = url.split("id=")[1]?.split("&")[0];
-                return `https://drive.google.com/uc?export=view&id=${id}`;
-              }
-              return url;
-            })()}
-            alt={project.title}
-            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
-          />
-        )}{" "}
+        {(() => {
+          const isVideoCat = project.category === "Videos" || project.category === "Motion Graphics";
+          const url = project.videoUrl || project.mediaUrl;
+          const isDirectVideo = url?.match(/\.(mp4|webm|ogg)$/i) || url?.startsWith("data:video");
+          const driveMatch = url?.match(/d\/([a-zA-Z0-9_-]+)/) || url?.match(/id=([a-zA-Z0-9_-]+)/);
+          const driveId = driveMatch ? driveMatch[1] : null;
+
+          if (isDirectVideo || (isVideoCat && driveId) || (isVideoCat && !project.mediaUrl && project.videoUrl)) {
+            const videoSrc = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : url;
+            return (
+              <video
+                src={videoSrc}
+                muted
+                playsInline
+                loop
+                autoPlay
+                className={`w-full h-full object-contain transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+              />
+            );
+          }
+
+          const displayUrl = (() => {
+            const mUrl = project.mediaUrl;
+            if (!mUrl) return "";
+            if (mUrl.includes("drive.google.com/file/d/")) {
+              const idMatch = mUrl.match(/d\/([a-zA-Z0-9_-]+)/);
+              return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : mUrl;
+            }
+            if (mUrl.includes("drive.google.com/open?id=")) {
+              const id = mUrl.split("id=")[1]?.split("&")[0];
+              return `https://drive.google.com/uc?export=view&id=${id}`;
+            }
+            return mUrl;
+          })();
+
+          return (
+            <img
+              src={displayUrl}
+              alt={project.title}
+              className={`w-full h-full object-contain transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+            />
+          );
+        })()}{" "}
         {/* Overlay for Video Type Projects */}{" "}
         {(project.category === "Videos" || project.category === "Motion Graphics") && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

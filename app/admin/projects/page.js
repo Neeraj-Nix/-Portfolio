@@ -40,30 +40,18 @@ export default function AdminProjects() {
     let generatedThumbnail = null;
     let isVideo = file.type.startsWith("video/");
 
-    // Auto-extract thumbnail for videos
+    // Auto-extract thumbnail is now disabled as per user request to show video directly
+    /*
     if (isVideo) {
       try {
         generatedThumbnail = await new Promise((resolve, reject) => {
-          const video = document.createElement("video");
-          video.src = URL.createObjectURL(file);
-          video.muted = true;
-          video.onloadedmetadata = () => {
-            video.currentTime = Math.min(1, video.duration / 2); // Frame at 1 sec
-          };
-          video.onseeked = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL("image/jpeg", 0.7));
-            URL.revokeObjectURL(video.src);
-          };
-          video.onerror = () => resolve(null); // Fallback if extraction fails
+          ...
         });
       } catch (err) {
         console.error("Thumbnail extraction failed");
       }
     }
+    */
 
     const data = new FormData();
     data.append("file", file);
@@ -74,8 +62,8 @@ export default function AdminProjects() {
           ...prev, 
           // Set the base64 Video URL if video, otherwise set the normal Image URL
           videoUrl: isVideo ? res.data.url : prev.videoUrl,
-          // Set the auto-extracted Thumbnail if video, otherwise set the normal Image URL
-          mediaUrl: isVideo && generatedThumbnail ? generatedThumbnail : res.data.url,
+          // For videos, we use the video itself in mediaUrl as requested
+          mediaUrl: res.data.url,
           category: isVideo ? "Videos" : "Graphics"
         }));
       }
@@ -151,32 +139,57 @@ export default function AdminProjects() {
             className="bg-[#ffffff] dark:bg-[#ffffff] border border-[#0066ff] dark:border-[#0066ff] rounded-2xl overflow-hidden shadow-sm"
           >
             {" "}
-            <div className="aspect-video relative bg-[#ffffff] dark:bg-[#ffffff]">
+            <div className="aspect-video relative bg-transparent">
               {" "}
-              {project.mediaUrl ? (
-                <img
-                  src={(() => {
-                    const url = project.mediaUrl;
-                    if (!url) return "";
-                    if (url.includes("drive.google.com/file/d/")) {
-                      const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
-                      return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
-                    }
-                    if (url.includes("drive.google.com/open?id=")) {
-                      const id = url.split("id=")[1]?.split("&")[0];
-                      return `https://drive.google.com/uc?export=view&id=${id}`;
-                    }
-                    return url;
-                  })()}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-[#0066ff]">
-                  {" "}
-                  <FaImage size={32} />{" "}
-                </div>
-              )}{" "}
+              {(() => {
+                const isVideoCat = project.category === "Videos" || project.category === "Motion Graphics";
+                const url = project.mediaUrl;
+                if (!url) {
+                  return (
+                    <div className="flex h-full items-center justify-center text-[#0066ff]">
+                      <FaImage size={32} />
+                    </div>
+                  );
+                }
+
+                const isDirectVideo = url?.match(/\.(mp4|webm|ogg)$/i) || url?.startsWith("data:video");
+                const driveMatch = url?.match(/d\/([a-zA-Z0-9_-]+)/) || url?.match(/id=([a-zA-Z0-9_-]+)/);
+                const driveId = driveMatch ? driveMatch[1] : null;
+
+                if (isDirectVideo || (isVideoCat && driveId)) {
+                  const videoSrc = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : url;
+                  return (
+                    <video
+                      src={videoSrc}
+                      muted
+                      loop
+                      autoPlay
+                      className="w-full h-full object-contain"
+                    />
+                  );
+                }
+
+                const displayUrl = (() => {
+                  if (url.includes("drive.google.com/file/d/")) {
+                    const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
+                    return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
+                  }
+                  if (url.includes("drive.google.com/open?id=")) {
+                    const id = url.split("id=")[1]?.split("&")[0];
+                    return `https://drive.google.com/uc?export=view&id=${id}`;
+                  }
+                  return url;
+                })();
+
+                return (
+                  <img
+                    src={displayUrl}
+                    alt={project.title}
+                    className="w-full h-full object-contain"
+                  />
+                );
+              })()}
+{" "}
               <div className="absolute top-3 left-3 bg-[#ffffff] backdrop-blur text-[#0066ff] text-xs px-2 py-1 rounded-md font-medium flex items-center gap-1">
                 {" "}
                 {project.category === "Videos" || project.category === "Motion Graphics" ? <FaVideo /> : <FaImage />}{" "}
@@ -280,13 +293,13 @@ export default function AdminProjects() {
                 </div>{" "}
                 <div>
                   <label className="block text-sm font-medium text-[#0066ff] dark:text-[#0066ff] mb-2">
-                    Thumbnail Image / Drive Link
+                    Thumbnail / Drive Video Link
                   </label>
                   <div className="flex flex-col gap-3">
                     <input
                       name="mediaUrl"
                       type="text"
-                      placeholder="Paste image/link directly (e.g. Google Drive image link)..."
+                      placeholder="Paste Drive Video Link or Image Link... (No thumbnail needed for videos)"
                       value={formData.mediaUrl}
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-xl bg-[#ffffff] dark:bg-[#ffffff] border border-[#0066ff] dark:border-[#0066ff] focus:ring-2 focus:ring-blue-500"

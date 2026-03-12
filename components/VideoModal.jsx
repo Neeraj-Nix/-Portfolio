@@ -36,7 +36,7 @@ export default function VideoModal({ isOpen, onClose, project }) {
                 src={project.videoUrl}
                 controls
                 autoPlay
-                className="w-full h-full object-contain bg-black"
+                className="w-full h-full object-contain bg-transparent"
               />
             ) : (
               <iframe
@@ -57,7 +57,7 @@ export default function VideoModal({ isOpen, onClose, project }) {
                   return url;
                 })()}
                 title={project.title}
-                className="w-full h-full border-0 bg-black"
+                className="w-full h-full border-0 bg-transparent"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
