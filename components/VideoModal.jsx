@@ -67,13 +67,9 @@ export default function VideoModal({ isOpen, onClose, project }) {
               src={(() => {
                 const url = project.mediaUrl;
                 if (!url) return "";
-                if (url.includes("drive.google.com/file/d/")) {
-                  const idMatch = url.match(/d\/([a-zA-Z0-9_-]+)/);
-                  return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : url;
-                }
-                if (url.includes("drive.google.com/open?id=")) {
-                  const id = url.split("id=")[1]?.split("&")[0];
-                  return `https://drive.google.com/uc?export=view&id=${id}`;
+                const driveMatch = url.match(/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+                if (driveMatch) {
+                  return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
                 }
                 return url;
               })()}

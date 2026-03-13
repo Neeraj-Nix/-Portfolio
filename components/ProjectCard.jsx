@@ -27,8 +27,8 @@ export default function ProjectCard({ project, onClick }) {
           const driveMatch = url?.match(/d\/([a-zA-Z0-9_-]+)/) || url?.match(/id=([a-zA-Z0-9_-]+)/);
           const driveId = driveMatch ? driveMatch[1] : null;
 
-          if (isDirectVideo || (isVideoCat && driveId) || (isVideoCat && !project.mediaUrl && project.videoUrl)) {
-            const videoSrc = driveId ? `https://drive.google.com/uc?export=download&id=${driveId}` : url;
+          if (isDirectVideo && !driveId) {
+            const videoSrc = url;
             return (
               <video
                 src={videoSrc}
@@ -44,14 +44,13 @@ export default function ProjectCard({ project, onClick }) {
           const displayUrl = (() => {
             const mUrl = project.mediaUrl;
             if (!mUrl) return "";
-            if (mUrl.includes("drive.google.com/file/d/")) {
-              const idMatch = mUrl.match(/d\/([a-zA-Z0-9_-]+)/);
-              return idMatch ? `https://drive.google.com/uc?export=view&id=${idMatch[1]}` : mUrl;
+            
+            // Handle Google Drive links (both file/d/ and open?id= formats)
+            const driveMatch = mUrl.match(/d\/([a-zA-Z0-9_-]+)/) || mUrl.match(/id=([a-zA-Z0-9_-]+)/);
+            if (driveMatch) {
+              return `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000`;
             }
-            if (mUrl.includes("drive.google.com/open?id=")) {
-              const id = mUrl.split("id=")[1]?.split("&")[0];
-              return `https://drive.google.com/uc?export=view&id=${id}`;
-            }
+            
             return mUrl;
           })();
 
@@ -60,6 +59,10 @@ export default function ProjectCard({ project, onClick }) {
               src={displayUrl}
               alt={project.title}
               className={`w-full h-full object-contain transition-transform duration-700 ${isHovered ? "scale-105" : "scale-100"}`}
+              onError={(e) => {
+                // Fallback for broken images
+                e.target.src = "https://via.placeholder.com/800x600?text=Media+Not+Found";
+              }}
             />
           );
         })()}{" "}
